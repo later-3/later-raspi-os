@@ -14,6 +14,7 @@ OBJCOPY := $(GCCPREFIX)objcopy
 RM := rm -f
 
 CFLAGS := -Wall -nostdlib -g -Iinclude
+ASMFLAGS := -Iinclude
 
 OBJ := $(BUILD_DIR)/main.o $(BUILD_DIR)/entry.o
 
@@ -26,7 +27,7 @@ $(KERN_IMG): $(OBJ) Makefile
 	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $(BUILD_DIR)/$@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
-	$(AS) -o $@ $<
+	$(AS) $(ASMFLAGS) -o $@ $<
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
