@@ -1,3 +1,4 @@
+#include "mm.h"
 
 .section ".text.boot"
 .global _start
