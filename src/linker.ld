@@ -8,8 +8,10 @@ SECTIONS
     }
     .text : { *(.text) }
     .data : { *(.data) }
-    .bss : { *(.bss COMMON) }
     . = ALIGN(8);
+    bss_begin = .;
+    .bss : { *(.bss*) }
+    bss_end = .;
     . = . + 0x1000; /* 4kB of stack memory */
     stack_top = .;
 }
