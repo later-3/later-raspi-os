@@ -22,7 +22,7 @@ OBJ := $(BUILD_DIR)/main.o $(BUILD_DIR)/entry.o
 all: clean $(KERN_IMG)
 
 $(KERN_IMG): $(OBJ) Makefile
-	$(LD) $(OBJ) -T linker.ld -o $(BUILD_DIR)/kernel8.elf
+	$(LD) $(OBJ) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf
 	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $(BUILD_DIR)/$@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
