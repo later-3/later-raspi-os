@@ -12,25 +12,27 @@ RM := rm -fr
 
 CFLAGS := -Wall -nostdlib -g
 
-OBJ := src/main.o src/entry.o
+OBJ := $(BUILD_DIR)/main.o $(BUILD_DIR)/entry.o
 
 .PHONY: all
 
 all: clean $(KERN_IMG)
 
-$(KERN_IMG): $(OBJ) Makefile
+prework:
 	mkdir build
+
+$(KERN_IMG): prework $(OBJ) Makefile
 	$(LD) $(OBJ) -T src/linker.ld -o $(BUILD_DIR)/kernel8.elf
 	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
 
-$(BUILD_DIR)/%.o: %.S
+$(BUILD_DIR)/%.o: src/%.S
 	$(AS) -o $@ $<
 
-$(BUILD_DIR)/%.o: %.c
+$(BUILD_DIR)/%.o: src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-run: $(KERN_IMG)
-	$(qemu) -M raspi3b -kernel $< -nographic
+run: 
+	$(qemu) -M raspi3b -kernel $(KERN_IMG) -nographic
 
 qemu-gdb: $(KERN_IMG)
 	$(qemu) -M raspi3b -kernel $< -gdb tcp::1234 -nographic -S
