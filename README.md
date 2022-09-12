@@ -1,4 +1,15 @@
-# # Hardware
+# 前言
+
+本章节的任务就是: 打印 `hello world` 到屏幕上。
+
+## 运行
+```c
+make all
+make run
+```
+注：需要安装好 `aarch64-linux-gnu-` 工具链，安装或者编译`qemu`
+
+## Hardware
 
 [RPi Hardware - eLinux.org](https://elinux.org/RPi_Hardware)
 [documentation/bcm2837.adoc at develop · raspberrypi/documentation · GitHub](https://github.com/raspberrypi/documentation/blob/develop/documentation/asciidoc/computers/processors/bcm2837.adoc)[BCM2837-ARM-Peripherals.-.Revised.-.V2-1.pdf](file:///C:/Users/later/AppData/Local/Temp/MicrosoftEdgeDownloads/4b2d2e7d-a513-48cb-8208-6b8d47ec5722/BCM2837-ARM-Peripherals.-.Revised.-.V2-1.pdf)
@@ -15,7 +26,7 @@ Raspberry Pi 3  BCM2837 SoC
 # start script
 
 ```
-qemu-system-aarch64 -M raspi3b -kernel kernel8.img -drive file=$(yourimagefile),if=sd,format=raw -serial stdio
+qemu-system-aarch64 -M raspi3b -kernel kernel8.img -drive file=$(your image file),if=sd,format=raw -serial stdio
 ```
 
 **-serial null -serial stdio**

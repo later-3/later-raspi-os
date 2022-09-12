@@ -1,6 +1,6 @@
 GCCPREFIX := aarch64-linux-gnu-
-BUILD_DIR := ../build
-qemu := /home/later/qemu/build/qemu-system-aarch64
+BUILD_DIR := ./build
+qemu := /home/later/code/qemu/build/qemu-system-aarch64
 KERN_IMG := $(BUILD_DIR)/kernel8.img
 CC := $(GCCPREFIX)gcc
 LD := $(GCCPREFIX)ld
@@ -8,19 +8,20 @@ AS := $(GCCPREFIX)as
 
 OBJCOPY := $(GCCPREFIX)objcopy
 
-RM := rm -f
+RM := rm -fr
 
 CFLAGS := -Wall -nostdlib -g
 
-OBJ := $(BUILD_DIR)/main.o $(BUILD_DIR)/entry.o
+OBJ := src/main.o src/entry.o
 
 .PHONY: all
 
 all: clean $(KERN_IMG)
 
 $(KERN_IMG): $(OBJ) Makefile
-	$(LD) $(OBJ) -T linker.ld -o $(BUILD_DIR)/kernel8.elf
-	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $(BUILD_DIR)/$@
+	mkdir build
+	$(LD) $(OBJ) -T src/linker.ld -o $(BUILD_DIR)/kernel8.elf
+	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
 
 $(BUILD_DIR)/%.o: %.S
 	$(AS) -o $@ $<
@@ -39,4 +40,5 @@ gdb:
 	aarch64-linux-gdb -x .gdbinit
 
 clean:
-	$(RM) $(BUILD_DIR)/kernel8.img $(BUILD_DIR)/kernel8.elf $(OBJ)
+	# $(RM) $(BUILD_DIR)/kernel8.img $(BUILD_DIR)/kernel8.elf $(OBJ)
+	$(RM) $(BUILD_DIR)
