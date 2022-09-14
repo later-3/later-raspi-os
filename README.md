@@ -69,7 +69,7 @@ EL1 for kernel
 We will start from EL3 in qemu raspi3b，we need change to EL1.
 
 # asm
-
+ 
 - wfe
   
   wait for event
