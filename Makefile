@@ -1,6 +1,6 @@
 GCCPREFIX := aarch64-linux-gnu-
-BUILD_DIR := ../build
-qemu := /home/later/qemu/build/qemu-system-aarch64
+BUILD_DIR := ./build
+qemu := /home/later/code/qemu/build/qemu-system-aarch64
 KERN_IMG := $(BUILD_DIR)/kernel8.img
 CC := $(GCCPREFIX)gcc
 LD := $(GCCPREFIX)ld
@@ -8,7 +8,7 @@ AS := $(GCCPREFIX)as
 
 OBJCOPY := $(GCCPREFIX)objcopy
 
-RM := rm -f
+RM := rm -fr
 
 CFLAGS := -Wall -nostdlib -g
 
@@ -18,18 +18,21 @@ OBJ := $(BUILD_DIR)/main.o $(BUILD_DIR)/entry.o
 
 all: clean $(KERN_IMG)
 
-$(KERN_IMG): $(OBJ) Makefile
-	$(LD) $(OBJ) -T linker.ld -o $(BUILD_DIR)/kernel8.elf
-	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $(BUILD_DIR)/$@
+prework:
+	mkdir build
 
-$(BUILD_DIR)/%.o: %.S
+$(KERN_IMG): prework $(OBJ) Makefile
+	$(LD) $(OBJ) -T src/linker.ld -o $(BUILD_DIR)/kernel8.elf
+	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
+
+$(BUILD_DIR)/%.o: src/%.S
 	$(AS) -o $@ $<
 
-$(BUILD_DIR)/%.o: %.c
+$(BUILD_DIR)/%.o: src/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-run: $(KERN_IMG)
-	$(qemu) -M raspi3b -kernel $< -nographic
+run: 
+	$(qemu) -M raspi3b -kernel $(KERN_IMG) -nographic
 
 qemu-gdb: $(KERN_IMG)
 	$(qemu) -M raspi3b -kernel $< -gdb tcp::1234 -nographic -S
@@ -39,4 +42,5 @@ gdb:
 	aarch64-linux-gdb -x .gdbinit
 
 clean:
-	$(RM) $(BUILD_DIR)/kernel8.img $(BUILD_DIR)/kernel8.elf $(OBJ)
+	# $(RM) $(BUILD_DIR)/kernel8.img $(BUILD_DIR)/kernel8.elf $(OBJ)
+	$(RM) $(BUILD_DIR)
