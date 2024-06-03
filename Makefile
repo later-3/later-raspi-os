@@ -1,6 +1,6 @@
 GCCPREFIX := aarch64-linux-gnu-
 BUILD_DIR := ./build
-qemu := /home/later/code/qemu/build/qemu-system-aarch64
+qemu := /root/code/qemu-9.0.0-rc0/build/qemu-system-aarch64
 KERN_IMG := $(BUILD_DIR)/kernel8.img
 CC := $(GCCPREFIX)gcc
 LD := $(GCCPREFIX)ld
@@ -34,12 +34,12 @@ $(BUILD_DIR)/%.o: src/%.c
 run: 
 	$(qemu) -M raspi3b -kernel $(KERN_IMG) -nographic
 
-qemu-gdb: $(KERN_IMG)
-	$(qemu) -M raspi3b -kernel $< -gdb tcp::1234 -nographic -S
+qemu-gdb:
+	$(qemu) -M raspi3b -kernel $(KERN_IMG) -gdb tcp::1234 -nographic -S
 
 gdb:
-	# gdb-multiarch -n -x .gdbinit
-	aarch64-linux-gdb -x .gdbinit
+	gdb-multiarch -n -x .gdbinit
+	# aarch64-linux-gdb -x .gdbinit
 
 clean:
 	# $(RM) $(BUILD_DIR)/kernel8.img $(BUILD_DIR)/kernel8.elf $(OBJ)
