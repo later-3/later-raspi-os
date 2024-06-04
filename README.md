@@ -66,7 +66,7 @@ address-space: memory
 ```
 
 ## 2、代码该如何编写？
-这次的代码相对来说，很简单，仅仅设置了栈，将其余的core停在了wfe，随即就跳转到了c函数，c语言是必要使用栈的。在c语言中，直接向`pl011`的寄存器空间传输字符串。可以看`pl011`的仿真代码，对于寄存器的写动作，偏移为0的情况下，会直接将字符显示到串口的。可以从上面的地址空间看到，`pl011`的寄存器的起始地址是0x3f201000,这和代码里面一致。
+这次的代码相对来说，很简单，仅仅设置了栈，将其余的core停在了wfe，随即就跳转到了c函数，c语言是必要使用栈的。在c语言中，直接向`pl011`的寄存器空间传输字符串。可以看`pl011`的仿真代码，对于寄存器的写动作，偏移为0的情况下，会直接将字符显示到串口的。可以从上面的地址空间看到，`pl011`的寄存器的起始地址是`0x3f201000`,这和代码里面一致。
 
 在仿真代码中，`raspi_machine_class_common_init`函数设置了
 ```c
@@ -75,6 +75,38 @@ mc->default_cpus = mc->min_cpus = mc->max_cpus = cores_count(board_rev);
 默认的cpu个数为4，在仿真代码中，cpu的启动地址都为0x300,在`hw/arm/boot.c/`的`do_cpu_reset`会设置cpu0的地址`cpu_set_pc(cs, info->loader_start);`为`0x80000`.
 
 在gdb里面，`info threads`可以查看不同的cpu，配合`threads 1.x`切换不同的cpu。因为我们自己处理每个cpu，所以不用默认的`firmware`,不过也看到了QEMU在仿真代码里面，如何做一个简易的`firmware`，`mpidr_el1`这个寄存器里面可以判断当前的cpuID，在arm编程指南里面有说读取`mpidr_el1`可以判断，但`mpidr_el1`是可以被更改的，`mpidr_el3`才是不会变的。最好是读取`mpidr_el3`,当然得有权限读取，如果没有那就读取`mpidr_el1`。但是编译直接报错，`unknown or missing system register name at operand 2 -- mrs x1,mpidr_el3`,而且在arm手册中也没有搜索到`mpidr_el3`，至于arm编程手册为啥会出现`mpidr_el3`，不纠结了，直接读取`mpidr_el1`。
+
+```asm
+cbz 等于0跳转
+cbnz 不等于0跳转
+```
+
+在aarch64中，一条汇编由4个字节组成，以第一条指令为例，`mrs     x1, CurrentEL`，来看看这个条汇编的机器码：
+```shell
+❯ xxd build/kernel8.img     
+00000000: 4142 38d5 2104 7e92 3f20 00f1 6001 0054  AB8.!.~.? ..`..T
+```
+
+使用在线的[arm汇编翻译](https://yozan233.github.io/Online-Assembler-Disassembler/)也可以看到一样的。
+```asm
+Disassembly:
+
+0x10000:      41 42 38 D5            mrs     x1, CurrentEL
+```
+mrs是将系统寄存器的值读到通用寄存器中，在arm手册里面有`AArch64 System Register Descriptions`可以查看各个系统寄存器的介绍。将十六进制转为二进制与QEMU仿真代码的翻译规则对比：
+```
+0xd5384241 -> 0b1101 0101 0011 1000 0100 0010 0100 0001
+```
+r3b使用的是 ARM Cortex-A53 处理器，属于 ARMv8 架构的 64 位处理器。在`target/arm/tcg/a64.decode`，找到MRS的匹配规则：
+```
+SYS             1101 0101 00 l:1 01 op1:3 crn:4 crm:4 op2:3 rt:5 op0=1
+SYS             1101 0101 00 l:1 10 op1:3 crn:4 crm:4 op2:3 rt:5 op0=2
+SYS             1101 0101 00 l:1 11 op1:3 crn:4 crm:4 op2:3 rt:5 op0=3
+```
+最高位的10bits是能够匹配上的，匹配规则可以在arm手册中找到：
+![](https://raw.githubusercontent.com/later-3/img_picgo/main/img/20240604083728.png)
+
+`make qemu-gdb`运行QEMU的终端，`make gdb`可以查看其他cpu会执行到wfe，而cpu0会跳转到c函数，往串口输出`hello world`
 
 ## Hardware
 
