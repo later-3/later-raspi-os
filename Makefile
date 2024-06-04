@@ -2,7 +2,7 @@ GCCPREFIX := aarch64-linux-gnu-
 BUILD_DIR := build
 SRC_DIR := src
 
-qemu := /home/later/qemu/build/qemu-system-aarch64
+qemu := /root/code/qemu-9.0.0-rc0/build/qemu-system-aarch64
 
 KERN_IMG := $(BUILD_DIR)/kernel8.img
 CC := $(GCCPREFIX)gcc
@@ -16,7 +16,7 @@ RM := rm -f
 CFLAGS := -Wall -nostdlib -g -Iinclude
 ASMFLAGS := -Iinclude
 
-OBJ := $(BUILD_DIR)/main.o $(BUILD_DIR)/entry.o
+OBJ := $(BUILD_DIR)/main.o  $(BUILD_DIR)/mm.o $(BUILD_DIR)/entry.o
 
 .PHONY: all
 
@@ -24,7 +24,7 @@ all: clean $(KERN_IMG)
 
 $(KERN_IMG): $(OBJ) Makefile
 	$(LD) $(OBJ) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf
-	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $(BUILD_DIR)/$@
+	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
 	$(AS) $(ASMFLAGS) -o $@ $<

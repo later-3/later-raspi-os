@@ -18,9 +18,11 @@ master:
 
     ldr x30, =stack_top
     mov sp, x30
+    mov x0, #0x0
     bl c_entry
     b .
 
 halt:
     wfe
     b halt
+    

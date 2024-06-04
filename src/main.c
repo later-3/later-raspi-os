@@ -9,6 +9,10 @@ print_uart0(const char *s) {
 }
 
 void
-c_entry() {
-    print_uart0("Hello world\n");
+c_entry(int cpuID) {
+    cpuID += 48;
+    print_uart0("Hello world");
+    print_uart0((char *)(&cpuID));
+    print_uart0("\n");
+
 }
