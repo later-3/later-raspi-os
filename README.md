@@ -1,6 +1,13 @@
 This is a os for raspi3b, which test on qemu.
 # 前言
-这是一个为了学习arm汇编和arm体系结构的项目，切换不同分支开始学习吧！Enjoy!
+这是一个为了学习arm汇编、arm体系结构、OS的项目，切换不同分支开始学习吧！Enjoy!
+
+主要是参考(或**照抄**)了以下仓库：
+[复旦大学的OS实验](https://github.com/FDUCSLG/OS-2020Fall-FDU),
+rpi4-osdev
+raspi3-tutorial
+
+结合自己的理解，将笔记整理到每个分支的Readme中。
 
 # asm
 
