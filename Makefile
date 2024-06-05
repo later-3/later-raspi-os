@@ -36,7 +36,7 @@ run: $(KERN_IMG)
 	$(qemu) -M raspi3b -kernel $< -nographic
 
 qemu-gdb: $(KERN_IMG)
-	$(qemu) -M raspi3b -kernel $< -gdb tcp::1234 -nographic -S -smp 2
+	$(qemu) -M raspi3b -kernel $< -gdb tcp::1234 -nographic -S
 
 gdb:
 	gdb-multiarch -n -x .gdbinit
