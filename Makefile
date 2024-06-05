@@ -16,7 +16,7 @@ RM := rm -f
 CFLAGS := -Wall -nostdlib -g -Iinclude
 ASMFLAGS := -Iinclude
 
-OBJ := $(BUILD_DIR)/main.o  $(BUILD_DIR)/mm.o $(BUILD_DIR)/entry.o
+OBJ := $(BUILD_DIR)/main.o  $(BUILD_DIR)/mm.o $(BUILD_DIR)/utils.o $(BUILD_DIR)/entry.o
 
 .PHONY: all
 
@@ -27,7 +27,7 @@ $(KERN_IMG): $(OBJ) Makefile
 	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
-	$(AS) $(ASMFLAGS) -o $@ $<
+	$(CC) $(ASMFLAGS) -MMD -c -o $@ $<
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
@@ -36,7 +36,7 @@ run: $(KERN_IMG)
 	$(qemu) -M raspi3b -kernel $< -nographic
 
 qemu-gdb: $(KERN_IMG)
-	$(qemu) -M raspi3b -kernel $< -gdb tcp::1234 -nographic -S
+	$(qemu) -M raspi3b -kernel $< -gdb tcp::1234 -nographic -S -smp 2
 
 gdb:
 	gdb-multiarch -n -x .gdbinit

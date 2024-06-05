@@ -8,11 +8,16 @@ print_uart0(const char *s) {
     }
 }
 
-void
-c_entry(int cpuID) {
-    cpuID += 48;
-    print_uart0("Hello world");
-    print_uart0((char *)(&cpuID));
-    print_uart0("\n");
+extern void delay ( unsigned long);
+void c_entry(int cpuID) {
+    char id;
+    // delay(10);
+    if (cpuID != 0) {
+        delay(100000000 * cpuID);
+    }
+    id = cpuID + '0';
+    print_uart0("Hello world ");
+    print_uart0(&id);
+    print_uart0("\r\n");
 
 }
