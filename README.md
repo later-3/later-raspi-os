@@ -96,3 +96,146 @@ MSR TTBR0_EL1, x0 // Move x0 into TTBR0_EL1
 
 AArch64 does not include support for coprocessors. 
 
+# 系统寄存器
+列出此次操作的相关寄存器。
+
+> ELR_ELn
+
+Exception Link Register
+Holds the address of the instruction which caused the exception. 1, 2, 3
+
+> HCR_ELn 
+
+Hypervisor Configuration Register
+Controls virtualization settings and trapping of exceptions to EL2. See Exception handling on page 18-8
+
+HCR_EL2:
+
+E2H, bit [34]
+
+In ARMv8.2 and ARMv8.1
+EL2 Host. Enables a configuration where a Host Operating System is running in EL2, and the Host
+Operating System's applications are running in EL0.
+
+0 EL2 is running a hypervisor.
+
+1 EL2 is running a Host Operating System.
+
+In ARMv8.0.
+
+Reserved,RES0
+
+RW, bit [31]
+
+Execution state control for lower Exception levels:
+
+0 Lower levels are all AArch32.
+
+1 The Execution state for EL1 is AArch64. The Execution state for EL0 is determined by
+the current value of PSTATE.nRW when executing at EL0
+
+TGE, bit [27]
+
+Trap General Exceptions, from Non-secure EL0.
+
+0 This control has no effect on execution at EL0.
+
+1 When the value of SCR_EL3.NS is 0, this control has no effect on execution at EL0.
+When the value of SCR_EL3.NS is 1, in all cases:
+• All exceptions that would be routed to EL1 are routed to EL2.
+
+处于el2，可以设置hcr_el2寄存器吗？
+
+在EL2级别，可以设置HCR_EL2寄存器。 HCR_EL2寄存器是用于控制Hypervisor（虚拟机监控器）的一些特性和行为的寄存器。通过设置HCR_EL2寄存器，可以控制虚拟化扩展的一些行为，如使能虚拟中断、使能虚拟定时器等。
+
+> SCR_ELn 
+
+Secure Configuration Register
+Controls Secure state and trapping of exceptions to EL3. See Handling synchronous exceptions on page 10-7. 3
+
+Defines the configuration of the current Security state. It specifies:
+• The Security state of EL0 and EL1, either Secure or Non-secure.
+• The Execution state at lower Exception levels.
+• Whether IRQ, FIQ, and External Abort interrupts are taken to EL3.
+
+RW, bit [10]
+
+Execution state control for lower Exception levels.
+
+0 Lower levels are all AArch32.
+
+1 The next lower level is AArch64.
+
+SMD, bit [7]
+
+Secure Monitor Call disable. Disables SMC instructions at EL1 and above, from both Security states
+and both Execution states.
+
+0 SMC instructions are enabled at EL1 and above.
+
+1 SMC instructions are UNDEFINED at EL1 and above.
+
+Note
+SMC instructions are always UNDEFINED at EL0
+
+NS, bit [0]
+
+Non-secure bit.
+
+0 Indicates that EL0 and EL1 are in Secure state, and so memory accesses from those
+Exception levels can access Secure memory
+
+1 Indicates that EL0 and EL1 are in Non-secure state, and so memory accesses from those
+Exception levels cannot access Secure memory
+
+> SCTLR_ELn
+
+SCTLR_ELn System Control Register
+Controls architectural features, for example the MMU, caches and alignment checking. 0, 1, 2, 3
+
+> SPSR_ELn 
+
+Saved Program Status Register
+Holds the saved processor state when an exception is taken to this mode or Exception level.
+abt, fiq, irq, und, 1,2, 3
+
+> TCR_ELn 
+
+Translation Control Register
+Determines which of the Translation Table Base Registers define the base address for a translation table walk required for the stage 1 translation of a memory access from ELn. Also controls the translation table format and holds cacheability and shareability information. See Separation of kernel and application Virtual Address spaces on page 12-7. 1, 2, 3
+TPIDR_ELn
+
+> CNTHCTL, Counter-timer Hyp Control register
+
+Purpose
+Controls the generation of an event stream from the physical counter, and access from Non-secure
+EL1 modes to the physical counter and the Non-secure EL1 physical timer.
+
+Configurations
+AArch32 System register CNTHCTL is architecturally mapped to AArch64 System register
+CNTHCTL_EL2.
+If EL2 is not implemented, this register is RES0 from EL3.
+RW fields in this register reset to architecturally UNKNOWN values.
+
+Attributes
+CNTHCTL is a 32-bit register
+
+> CNTHCTL_EL2, Counter-timer Hypervisor Control register
+
+The CNTHCTL_EL2 characteristics are:
+
+Purpose
+Controls the generation of an event stream from the physical counter, and access from Non-secure
+EL1 to the physical counter and the Non-secure EL1 physical timer.
+
+Configurations
+AArch64 System register CNTHCTL_EL2 is architecturally mapped to AArch32 System register
+CNTHCTL.
+If EL2 is not implemented, this register is RES0 from EL3.
+RW fields in this register reset to architecturally UNKNOWN values.
+
+Attributes
+CNTHCTL_EL2 is a 32-bit register.
+
+
+
