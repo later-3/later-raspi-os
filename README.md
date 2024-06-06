@@ -104,6 +104,13 @@ AArch64 does not include support for coprocessors.
 Exception Link Register
 Holds the address of the instruction which caused the exception. 1, 2, 3
 
+ELR_EL3
+
+When taking an exception to EL3, holds the address to return to.This register is present only when EL3 is implemented. Otherwise, direct accesses to ELR_EL3 are UNDEFINED.
+
+![](https://raw.githubusercontent.com/later-3/img_picgo/main/img/20240606134326.png)
+
+
 > HCR_ELn 
 
 Hypervisor Configuration Register
@@ -196,8 +203,17 @@ Controls architectural features, for example the MMU, caches and alignment check
 > SPSR_ELn 
 
 Saved Program Status Register
+
 Holds the saved processor state when an exception is taken to this mode or Exception level.
 abt, fiq, irq, und, 1,2, 3
+
+SCTLR_EL1, System Control Register (EL1)
+
+Purpose
+
+Provides top level control of the system, including its memory system, at EL1 and EL0.
+
+![](https://raw.githubusercontent.com/later-3/img_picgo/main/img/20240606135106.png)
 
 > TCR_ELn 
 
@@ -236,6 +252,44 @@ RW fields in this register reset to architecturally UNKNOWN values.
 
 Attributes
 CNTHCTL_EL2 is a 32-bit register.
+
+> CNTVOFF_EL2
+
+Counter-timer Virtual Offset Register
+
+Purpose
+
+Holds the 64-bit virtual offset. This is the offset for the AArch64 virtual timers and counters.
+
+
+> TTBR0_EL1, Translation Table Base Register 0 (EL1)
+
+Purpose
+
+Holds the base address of the translation table for the initial lookup for stage 1 of the translation of an address from the lower VA range in the EL1&0 translation regime, and other information for this translation regime.
+
+> TTBR1_EL1, Translation Table Base Register 1 (EL1)
+
+Purpose
+
+Holds the base address of the translation table for the initial lookup for stage 1 of the translation of an address from the higher VA range in the EL1&0 stage 1 translation regime, and other information for this translation regime.
+
+
+> MAIR_EL1, Memory Attribute Indirection Register (EL1)
+
+Purpose
+
+Provides the memory attribute encodings corresponding to the possible AttrIndx values in a Long-descriptor format translation table entry for stage 1 translations at EL1.
+
+
+# 跳转到el1，设置系统寄存器
+因为操作系统在el1，所以先跳转到el1。在QEMU初始化时，先设置为el3，在cpu reset的时候设置为el2:
+```c
+hw/arm/boot.c
+do_cpu_reset
+int target_el = arm_feature(env, ARM_FEATURE_EL2) ? 2 : 1;
+arm_emulate_firmware_reset(cs, target_el);
+```
 
 
 
