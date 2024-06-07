@@ -291,5 +291,9 @@ int target_el = arm_feature(env, ARM_FEATURE_EL2) ? 2 : 1;
 arm_emulate_firmware_reset(cs, target_el);
 ```
 
-
+代码里面虽然设置了el3的处理，但实际没有走到该代码。从高级别权限到低级别权限，需要使用`eret`，这是返回到低级别权限的一个地址，继续执行代码，所以要先设置低级别权限的返回地址：
+```asm
+    adr     x2, el1
+    msr     elr_el3, x2
+```
 

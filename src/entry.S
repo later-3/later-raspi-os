@@ -1,4 +1,5 @@
 #include "mm.h"
+#include "sysregs.h"
 
 .section ".text.boot"
 .global _start
@@ -21,9 +22,9 @@ el1:
     cbnz    x1, 2f
 
 el3:
-    mov     x2, #0x5b1
+    ldr     x2, =SCR3_VALUE
     msr     scr_el3, x2
-    mov     x2, #0x3c9
+    ldr     x2, =SPSR3_VALUE
     msr     spsr_el3, x2
     adr     x2, el1
     msr     elr_el3, x2
@@ -42,18 +43,25 @@ el2:
     orr     x0, x0, #3
     msr     cnthctl_el2, x0
     msr     cntvoff_el2, xzr
+
     /* Enable AArch64 in EL1. */
     mov     x0, #(1 << 31)      /* AArch64 */
     orr     x0, x0, #(1 << 1)   /* SWIO hardwired on Pi3 */
     msr     hcr_el2, x0
     mrs     x0, hcr_el2
+
     /* Setup SCTLR access. */
-    mov     x2, #0x0800
-    movk    x2, #0x30d0, lsl #16
+//    mov     x2, #0x0800
+//    movk    x2, #0x30d0, lsl #16
+//    msr     sctlr_el1, x2
+
+    ldr     x2, =SCTLR_VALUE_MMU_DISABLED
     msr     sctlr_el1, x2
+
     /* Change execution level to EL1. */
     mov     x2, #0x3c4
     msr     spsr_el2, x2
+    
     adr     x2, el1
     msr     elr_el2, x2
 
