@@ -22,9 +22,9 @@ el1:
     cbnz    x1, 2f
 
 el3:
-    ldr     x2, =SCR3_VALUE
+    ldr     x2, =SCREL3_VALUE
     msr     scr_el3, x2
-    ldr     x2, =SPSR3_VALUE
+    ldr     x2, =SPSREL3_VALUE
     msr     spsr_el3, x2
     adr     x2, el1
     msr     elr_el3, x2
@@ -51,15 +51,15 @@ el2:
     mrs     x0, hcr_el2
 
     /* Setup SCTLR access. */
-//    mov     x2, #0x0800
-//    movk    x2, #0x30d0, lsl #16
-//    msr     sctlr_el1, x2
+    mov     x2, #0x0800
+    movk    x2, #0x30d0, lsl #16
+    msr     sctlr_el1, x2
 
     ldr     x2, =SCTLR_VALUE_MMU_DISABLED
     msr     sctlr_el1, x2
 
     /* Change execution level to EL1. */
-    mov     x2, #0x3c4
+    ldr     x2, =SPSREL2_VALUE
     msr     spsr_el2, x2
     
     adr     x2, el1

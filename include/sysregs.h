@@ -35,17 +35,26 @@
 #define SCR_RESERVED	    (3 << 4) // why? reserved
 #define SCR_RW				(1 << 10) // Execution state control for lower Exception levels. aarch32 or aarch64
 #define SCR_NS				(1 << 0) // Non-secure bit. When Secure state is not implemented, SCR_EL3.NS is RES1 and its effective value is 1.
-#define SCR3_VALUE	    	    	(SCR_RESERVED | SCR_RW | SCR_NS)
+#define SCREL3_VALUE	    	    	(SCR_RESERVED | SCR_RW | SCR_NS)
 
 // ***************************************
 // SPSR_EL3, Saved Program Status Register (EL3) Page 389 of AArch64-Reference-Manual.
 // ***************************************
 
 #define SPSR_MASK_ALL 			(7 << 6) // FIQ, bit [6] IRQ, bit [7]  A, bit [8]
-#define SPSR_EL1h			(5 << 0) // M[3:0] AArch64 Exception level and selected Stack Pointer. 
+#define SPSREL3_EL1h			(5 << 0) // M[3:0] AArch64 Exception level and selected Stack Pointer. 
                                     // 0b0101	EL1 with SP_EL1 (EL1h).
                                     // 0b1001	EL2 with SP_EL2 (EL2h).
-#define SPSR3_VALUE			(SPSR_MASK_ALL | SPSR_EL1h)
+
+#define SPSREL3_VALUE			(SPSR_MASK_ALL | SPSREL3_EL1h)
+
+#define SPSREL2_M               (4 << 0) // 0b0100	EL1 with SP_EL0 (EL1t).                              
+#define SPSREL2_D               (1 << 9) // Debug exception mask. 
+                                         // Set to the value of PSTATE.
+                                        //D on taking an exception to EL2, and copied to PSTATE.
+                                        //D on executing an exception return operation in EL2, bit [9]
+#define SPSREL2_VALUE			(SPSR_MASK_ALL | SPSREL2_M | SPSREL2_D)
+
 
 // System Control Register (EL1)
 #define SCTLR_EOS      (1 << 11)     //bit [11] EL1, 

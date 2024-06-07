@@ -297,3 +297,4 @@ arm_emulate_firmware_reset(cs, target_el);
     msr     elr_el3, x2
 ```
 
+有些寄存器的值，目前设置还不能体现其价值，后续有涉及再返回过来更新。不管怎么样，我们现在都到el1了，这是属于操作系统的exception level。
