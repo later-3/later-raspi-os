@@ -12,3 +12,18 @@ get_cpuid:
     mov     x2, x1
     and     x2, x2, #3
     ret
+
+.global read_reg
+read_reg:
+    ldr w0,[x0]
+	ret
+
+.global write_reg
+write_reg:
+	str w1,[x0]
+	ret
+
+.global sleep
+sleep:
+    1: wfe
+        b 1b 

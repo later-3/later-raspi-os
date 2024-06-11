@@ -1,300 +1,64 @@
-# exception_level
-arm编程手册中`Fundamentals of ARMv8`介绍了关于异常级别相关内容。Exception level determines the privilege level, so execution at ELn corresponds to privilege PLn. Exception levels provide a logical separation of software execution privilege that applies across all operating states og the ARMv8 architecture. It is similar to, and supports the concept of, hierarchical protection domains common in computer science.
-
-The following is a typical example of what software runs at each Exception level:
-EL0 Normal user applications.
-EL1 Operating system kernel typically described as privileged.
-EL2 Hypervisor.
-EL3 Low-level firmware, including the Secure Monitor.
-
-# Execution states
-The ARMv8 architecture defines two Execution States, AArch64 and Arch32. Each state is used to describe execution using 64-bit wide general-purpose registers or 32-bit wide general-purpose registers, respectively. While ARMv8 AArch32 retains the ARMv7 definitions
-of privilege, in AArch64, privilege level is determined by the Exception level. Therefore,
-execution at ELn corresponds to privilege PLn.
-
-When in AArch64 state, the processor executes the A64 instruction set. When in AArch32 state,
-the processor can execute either the A32 (called ARM in earlier versions of the architecture) or
-the T32 (Thumb) instruction set.
-
-# changing Exception levels
- ![](https://raw.githubusercontent.com/later-3/img_picgo/main/img/20240605213511.png)
-
-When an exception occurs, the core saves the
-current execution state and the return address, enters the required mode, and possibly disables
-hardware interrupts.(ARMv7)
-
-Movement between Exception levels follows these rules:
-• Moves to a higher Exception level, such as from EL0 to EL1, indicate increased software
-execution privilege.
-• An exception cannot be taken to a lower Exception level.
-• There is no exception handling at level EL0, exceptions must be handled at a higher
-Exception level.
-• An exception causes a change of program flow. Execution of an exception handler starts,
-at an Exception level higher than EL0, from a defined vector that relates to the exception
-taken. Exceptions include:
-— Interrupts such as IRQ and FIQ.
-— Memory system aborts.
-— Undefined instructions.
-— System calls. These permit unprivileged software to make a system call to an
-operating system.
-— Secure monitor or hypervisor traps.
-
-• Ending exception handling and returning to the previous Exception level is performed by
-executing the ERET instruction.
-
-• Returning from an exception can stay at the same Exception level or enter a lower
-Exception level. It cannot move to a higher Exception level.
-
-• The security state does change with a change of Exception level, except when retuning
-from EL3 to a Non-secure state. See Switching between Secure and Non-secure state on
-page 17-8.
-
-# changing execution state
-There are times when you must change the execution state of your system. This could be, for
-example, if you are running a 64-bit operating system, and want to run a 32-bit application at
-EL0. To do this, the system must change to AArch32.
-
-When the application has completed or execution returns to the OS, the system can switch back
-to AArch64. Figure 3-7 on page 3-9 shows that you cannot do it the other way around. An
-AArch32 operating system cannot host a 64-bit application.
-
-![](https://raw.githubusercontent.com/later-3/img_picgo/main/img/20240605215125.png)
-
-To change between execution states at the same Exception level, you have to switch to a higher
-Exception level then return to the original Exception level. For example, you might have 32-bit
-and 64-bit applications running under a 64-bit OS. In this case, the 32-bit application can
-execute and generate a Supervisor Call (SVC) instruction, or receive an interrupt, causing a
-switch to EL1 and AArch64. (See Exception handling instructions on page 6-21.) The OS can
-then do a task switch and return to EL0 in AArch64. Practically speaking, this means that you
-cannot have a mixed 32-bit and 64-bit application, because there is no direct way of calling
-between them.
-
-You can only change execution state by changing Exception level. Taking an exception might
-change from AArch32 to AArch64, and returning from an exception may change from AArch64
-to AArch32.
-
-Code at EL3 cannot take an exception to a higher exception level, so cannot change execution
-state, except by going through a reset.
-
-# EL2 and EL1 change
-## system register
-In AArch64, system configuration is controlled through system registers, and accessed using
-MSR and MRS instructions. The name of a register tells you the lowest
-Exception level that it can be accessed from.
-
-For example:
-• TTBR0_EL1 is accessible from EL1, EL2, and EL3.
-• TTBR0_EL2 is accessible from EL2 and EL3.
-
-Registers that have the suffix _ELn have a separate, banked copy in some or all of the levels,
-though usually not EL0. Few system registers are accessible from EL0, although the Cache Type
-Register (CTR_EL0) is an example of one that can be accessible.
-
-Code to access system registers takes the following form:
-MRS x0, TTBR0_EL1 // Move TTBR0_EL1 into x0
-MSR TTBR0_EL1, x0 // Move x0 into TTBR0_EL1
-
-AArch64 does not include support for coprocessors. 
-
-# 系统寄存器
-列出此次操作的相关寄存器。
-
-> ELR_ELn
-
-Exception Link Register
-Holds the address of the instruction which caused the exception. 1, 2, 3
-
-ELR_EL3
-
-When taking an exception to EL3, holds the address to return to.This register is present only when EL3 is implemented. Otherwise, direct accesses to ELR_EL3 are UNDEFINED.
-
-![](https://raw.githubusercontent.com/later-3/img_picgo/main/img/20240606134326.png)
-
-
-> HCR_ELn 
-
-Hypervisor Configuration Register
-Controls virtualization settings and trapping of exceptions to EL2. See Exception handling on page 18-8
-
-HCR_EL2:
-
-E2H, bit [34]
-
-In ARMv8.2 and ARMv8.1
-EL2 Host. Enables a configuration where a Host Operating System is running in EL2, and the Host
-Operating System's applications are running in EL0.
-
-0 EL2 is running a hypervisor.
-
-1 EL2 is running a Host Operating System.
-
-In ARMv8.0.
-
-Reserved,RES0
-
-RW, bit [31]
-
-Execution state control for lower Exception levels:
-
-0 Lower levels are all AArch32.
-
-1 The Execution state for EL1 is AArch64. The Execution state for EL0 is determined by
-the current value of PSTATE.nRW when executing at EL0
-
-TGE, bit [27]
-
-Trap General Exceptions, from Non-secure EL0.
-
-0 This control has no effect on execution at EL0.
-
-1 When the value of SCR_EL3.NS is 0, this control has no effect on execution at EL0.
-When the value of SCR_EL3.NS is 1, in all cases:
-• All exceptions that would be routed to EL1 are routed to EL2.
-
-处于el2，可以设置hcr_el2寄存器吗？
-
-在EL2级别，可以设置HCR_EL2寄存器。 HCR_EL2寄存器是用于控制Hypervisor（虚拟机监控器）的一些特性和行为的寄存器。通过设置HCR_EL2寄存器，可以控制虚拟化扩展的一些行为，如使能虚拟中断、使能虚拟定时器等。
-
-> SCR_ELn 
-
-Secure Configuration Register
-Controls Secure state and trapping of exceptions to EL3. See Handling synchronous exceptions on page 10-7. 3
-
-Defines the configuration of the current Security state. It specifies:
-• The Security state of EL0 and EL1, either Secure or Non-secure.
-• The Execution state at lower Exception levels.
-• Whether IRQ, FIQ, and External Abort interrupts are taken to EL3.
-
-RW, bit [10]
-
-Execution state control for lower Exception levels.
-
-0 Lower levels are all AArch32.
-
-1 The next lower level is AArch64.
-
-SMD, bit [7]
-
-Secure Monitor Call disable. Disables SMC instructions at EL1 and above, from both Security states
-and both Execution states.
-
-0 SMC instructions are enabled at EL1 and above.
-
-1 SMC instructions are UNDEFINED at EL1 and above.
-
-Note
-SMC instructions are always UNDEFINED at EL0
-
-NS, bit [0]
-
-Non-secure bit.
-
-0 Indicates that EL0 and EL1 are in Secure state, and so memory accesses from those
-Exception levels can access Secure memory
-
-1 Indicates that EL0 and EL1 are in Non-secure state, and so memory accesses from those
-Exception levels cannot access Secure memory
-
-> SCTLR_ELn
-
-SCTLR_ELn System Control Register
-Controls architectural features, for example the MMU, caches and alignment checking. 0, 1, 2, 3
-
-> SPSR_ELn 
-
-Saved Program Status Register
-
-Holds the saved processor state when an exception is taken to this mode or Exception level.
-abt, fiq, irq, und, 1,2, 3
-
-SCTLR_EL1, System Control Register (EL1)
-
-Purpose
-
-Provides top level control of the system, including its memory system, at EL1 and EL0.
-
-![](https://raw.githubusercontent.com/later-3/img_picgo/main/img/20240606135106.png)
-
-> TCR_ELn 
-
-Translation Control Register
-Determines which of the Translation Table Base Registers define the base address for a translation table walk required for the stage 1 translation of a memory access from ELn. Also controls the translation table format and holds cacheability and shareability information. See Separation of kernel and application Virtual Address spaces on page 12-7. 1, 2, 3
-TPIDR_ELn
-
-> CNTHCTL, Counter-timer Hyp Control register
-
-Purpose
-Controls the generation of an event stream from the physical counter, and access from Non-secure
-EL1 modes to the physical counter and the Non-secure EL1 physical timer.
-
-Configurations
-AArch32 System register CNTHCTL is architecturally mapped to AArch64 System register
-CNTHCTL_EL2.
-If EL2 is not implemented, this register is RES0 from EL3.
-RW fields in this register reset to architecturally UNKNOWN values.
-
-Attributes
-CNTHCTL is a 32-bit register
-
-> CNTHCTL_EL2, Counter-timer Hypervisor Control register
-
-The CNTHCTL_EL2 characteristics are:
-
-Purpose
-Controls the generation of an event stream from the physical counter, and access from Non-secure
-EL1 to the physical counter and the Non-secure EL1 physical timer.
-
-Configurations
-AArch64 System register CNTHCTL_EL2 is architecturally mapped to AArch32 System register
-CNTHCTL.
-If EL2 is not implemented, this register is RES0 from EL3.
-RW fields in this register reset to architecturally UNKNOWN values.
-
-Attributes
-CNTHCTL_EL2 is a 32-bit register.
-
-> CNTVOFF_EL2
-
-Counter-timer Virtual Offset Register
-
-Purpose
-
-Holds the 64-bit virtual offset. This is the offset for the AArch64 virtual timers and counters.
-
-
-> TTBR0_EL1, Translation Table Base Register 0 (EL1)
-
-Purpose
-
-Holds the base address of the translation table for the initial lookup for stage 1 of the translation of an address from the lower VA range in the EL1&0 translation regime, and other information for this translation regime.
-
-> TTBR1_EL1, Translation Table Base Register 1 (EL1)
-
-Purpose
-
-Holds the base address of the translation table for the initial lookup for stage 1 of the translation of an address from the higher VA range in the EL1&0 stage 1 translation regime, and other information for this translation regime.
-
-
-> MAIR_EL1, Memory Attribute Indirection Register (EL1)
-
-Purpose
-
-Provides the memory attribute encodings corresponding to the possible AttrIndx values in a Long-descriptor format translation table entry for stage 1 translations at EL1.
-
-
-# 跳转到el1，设置系统寄存器
-因为操作系统在el1，所以先跳转到el1。在QEMU初始化时，先设置为el3，在cpu reset的时候设置为el2:
+# uart1
+本次任务是使能uart1，操作uart1。在前述章节都偷懒使用的是`pl011`,我们根本没有为串口写任何驱动，直接走后门，往串口地址输出，就显示文字了，为了能够熟悉rp3的硬件，熟悉如何操作这些硬件，我们需要将输出任务交给rp3的串口模块：mini-uart
+
+# 硬件信息
+https://www.raspberrypi.org/app/uploads/2012/02/BCM2835-ARM-Peripherals.pdf
+这里能看到uart相关的寄存器信息，但是偏移和仿真的板子有点差异：
+```
+memory-region: bcm2835-peripherals
+  000000003f000000-000000003fffffff (prio 1, i/o): bcm2835-peripherals
+    000000003f003000-000000003f00301f (prio 0, i/o): bcm2835-sys-timer
+    000000003f004000-000000003f004fff (prio -1000, i/o): bcm2835-txp
+    000000003f006000-000000003f006fff (prio 0, i/o): mphi
+    000000003f007000-000000003f007fff (prio 0, i/o): bcm2835-dma
+    000000003f00b200-000000003f00b3ff (prio 0, i/o): bcm2835-ic
+    000000003f00b400-000000003f00b43f (prio -1000, i/o): bcm2835-sp804
+    000000003f00b800-000000003f00bbff (prio 0, i/o): bcm2835-mbox
+    000000003f100000-000000003f1001ff (prio 0, i/o): bcm2835-powermgt
+    000000003f101000-000000003f102fff (prio 0, i/o): bcm2835-cprman
+    000000003f104000-000000003f10400f (prio 0, i/o): bcm2835-rng
+    000000003f200000-000000003f200fff (prio 0, i/o): bcm2835_gpio
+    000000003f201000-000000003f201fff (prio 0, i/o): pl011
+    000000003f202000-000000003f202fff (prio 0, i/o): bcm2835-sdhost
+    000000003f203000-000000003f2030ff (prio -1000, i/o): bcm2835-i2s
+    000000003f204000-000000003f204017 (prio 0, i/o): bcm2835-spi
+    000000003f205000-000000003f205023 (prio 0, i/o): bcm2835-i2c
+    000000003f20f000-000000003f20f07f (prio -1000, i/o): bcm2835-otp
+    000000003f212000-000000003f212007 (prio 0, i/o): bcm2835-thermal
+    000000003f214000-000000003f2140ff (prio -1000, i/o): bcm2835-spis
+    000000003f215000-000000003f2150ff (prio 0, i/o): bcm2835-aux
+    000000003f300000-000000003f3000ff (prio 0, i/o): sdhci
+    000000003f600000-000000003f6000ff (prio -1000, i/o): bcm2835-smi
+    000000003f804000-000000003f804023 (prio 0, i/o): bcm2835-i2c
+    000000003f805000-000000003f805023 (prio 0, i/o): bcm2835-i2c
+    000000003f900000-000000003f907fff (prio -1000, i/o): bcm2835-dbus
+    000000003f910000-000000003f917fff (prio -1000, i/o): bcm2835-ave0
+    000000003f980000-000000003f990fff (prio 0, i/o): dwc2
+      000000003f980000-000000003f980fff (prio 0, i/o): dwc2-io
+      000000003f981000-000000003f990fff (prio 0, i/o): dwc2-fifo
+    000000003fc00000-000000003fc00fff (prio -1000, i/o): bcm2835-v3d
+    000000003fe00000-000000003fe000ff (prio -1000, i/o): bcm2835-sdramc
+    000000003fe05000-000000003fe050ff (prio 0, i/o): bcm2835-dma-chan15
+```
+pdf里面的偏移是0x7E215000，仿真板子是0x3f215000,里面的寄存器是一样的：
+![](https://raw.githubusercontent.com/later-3/img_picgo/main/img/20240607185722.png)
+
+仿真里面对uart寄存器的定义：
 ```c
-hw/arm/boot.c
-do_cpu_reset
-int target_el = arm_feature(env, ARM_FEATURE_EL2) ? 2 : 1;
-arm_emulate_firmware_reset(cs, target_el);
+hw/char/bcm2835_aux.c
+#define AUX_IRQ         0x0
+#define AUX_ENABLES     0x4
+#define AUX_MU_IO_REG   0x40
+#define AUX_MU_IER_REG  0x44
+#define AUX_MU_IIR_REG  0x48
+#define AUX_MU_LCR_REG  0x4c
+#define AUX_MU_MCR_REG  0x50
+#define AUX_MU_LSR_REG  0x54
+#define AUX_MU_MSR_REG  0x58
+#define AUX_MU_SCRATCH  0x5c
+#define AUX_MU_CNTL_REG 0x60
+#define AUX_MU_STAT_REG 0x64
+#define AUX_MU_BAUD_REG 0x68
+
 ```
 
-代码里面虽然设置了el3的处理，但实际没有走到该代码。从高级别权限到低级别权限，需要使用`eret`，这是返回到低级别权限的一个地址，继续执行代码，所以要先设置低级别权限的返回地址：
-```asm
-    adr     x2, el1
-    msr     elr_el3, x2
-```
-
-有些寄存器的值，目前设置还不能体现其价值，后续有涉及再返回过来更新。不管怎么样，我们现在都到el1了，这是属于操作系统的exception level。

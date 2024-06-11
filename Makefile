@@ -18,12 +18,18 @@ ASMFLAGS := -Iinclude
 
 OBJ := $(BUILD_DIR)/main.o  $(BUILD_DIR)/mm.o $(BUILD_DIR)/utils.o $(BUILD_DIR)/entry.o
 
+C_FILES = $(wildcard src/*.c)
+ASM_FILES = $(wildcard src/*.S)
+OBJ_FILES = $(C_FILES:%.c=objects/%_c.o)
+OBJ_FILES += $(ASM_FILES:%.S=objects/%_s.o)
+
+
 .PHONY: all
 
 all: clean $(KERN_IMG)
 
-$(KERN_IMG): $(OBJ) Makefile
-	$(LD) $(OBJ) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf
+$(KERN_IMG): $(OBJ_FILES) Makefile
+	$(LD) $(OBJ_FILES) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf
 	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
@@ -43,4 +49,4 @@ gdb:
 	# aarch64-linux-gdb -x .gdbinit
 
 clean:
-	$(RM) $(BUILD_DIR)/kernel8.img $(BUILD_DIR)/kernel8.elf $(OBJ)
+	$(RM) $(BUILD_DIR)/kernel8.img $(BUILD_DIR)/kernel8.elf $(OBJ_FILES)
