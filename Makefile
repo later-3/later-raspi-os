@@ -19,24 +19,39 @@ ASMFLAGS := -Iinclude
 OBJ := $(BUILD_DIR)/main.o  $(BUILD_DIR)/mm.o $(BUILD_DIR)/utils.o $(BUILD_DIR)/entry.o
 
 C_FILES = $(wildcard src/*.c)
+P_FILES = $(wildcard src/peripheral/*.c)
 ASM_FILES = $(wildcard src/*.S)
-OBJ_FILES = $(C_FILES:%.c=objects/%_c.o)
-OBJ_FILES += $(ASM_FILES:%.S=objects/%_s.o)
+OBJ_FILES = $(C_FILES:%.c=build/%_c.o)
+OBJ_FILES += $(P_FILES:%.c=build/%_c.o)
+OBJ_FILES += $(ASM_FILES:%.S=build/%_s.o)
 
+DEP_FILES = $(OBJ_FILES:%.o=%.d)
+-include $(DEP_FILES)
 
 .PHONY: all
 
-all: clean $(KERN_IMG)
+all: clean $(KERN_IMG) 
 
-$(KERN_IMG): $(OBJ_FILES) Makefile
-	$(LD) $(OBJ_FILES) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf
-	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
+print_variable:
+	mkdir -p build
+	mkdir -p build/src
+	mkdir -p build/src/peripheral
+	@echo $(ASM_FILES)
+	@echo $(C_FILES)
+	@echo $(OBJ_FILES)
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
+$(BUILD_DIR)/src/%_s.o: $(SRC_DIR)/%.S
 	$(CC) $(ASMFLAGS) -MMD -c -o $@ $<
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+$(BUILD_DIR)/src/%_c.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/src/peripheral/%_c.o: $(SRC_DIR)/peripheral/%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
+
+$(KERN_IMG): print_variable $(OBJ_FILES) Makefile
+	$(LD) $(OBJ_FILES) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf
+	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
 
 run: $(KERN_IMG)
 	$(qemu) -M raspi3b -kernel $< -nographic
@@ -49,4 +64,4 @@ gdb:
 	# aarch64-linux-gdb -x .gdbinit
 
 clean:
-	$(RM) $(BUILD_DIR)/kernel8.img $(BUILD_DIR)/kernel8.elf $(OBJ_FILES)
+	$(RM) -rf $(BUILD_DIR)
