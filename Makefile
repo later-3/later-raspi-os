@@ -2,7 +2,7 @@ GCCPREFIX := aarch64-linux-gnu-
 BUILD_DIR := build
 SRC_DIR := src
 
-qemu := /root/code/qemu-9.0.0-rc0/build/qemu-system-aarch64
+qemu := /home/later/code/qemu-9.0.0/build/qemu-system-aarch64
 
 KERN_IMG := $(BUILD_DIR)/kernel8.img
 CC := $(GCCPREFIX)gcc
@@ -14,6 +14,7 @@ OBJCOPY := $(GCCPREFIX)objcopy
 RM := rm -f
 
 CFLAGS := -Wall -nostdlib -g -Iinclude
+COPS = -Wall -nostdlib -nostartfiles -ffreestanding -Iinclude -mgeneral-regs-only
 ASMFLAGS := -Iinclude
 
 OBJ := $(BUILD_DIR)/main.o  $(BUILD_DIR)/mm.o $(BUILD_DIR)/utils.o $(BUILD_DIR)/entry.o
@@ -44,7 +45,7 @@ $(BUILD_DIR)/src/%_s.o: $(SRC_DIR)/%.S
 	$(CC) $(ASMFLAGS) -MMD -c -o $@ $<
 
 $(BUILD_DIR)/src/%_c.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(COPS) -MMD -c -o $@ $<
 
 $(BUILD_DIR)/src/peripheral/%_c.o: $(SRC_DIR)/peripheral/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<

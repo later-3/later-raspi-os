@@ -21,4 +21,8 @@
 
 void aux_uart_init(void);
 
+char uart_getchar ( void );
+void uart_putchar ( char c );
+void putc ( void* p, char c );
+
 #endif

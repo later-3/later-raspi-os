@@ -1,6 +1,32 @@
 # uart1
 本次任务是使能uart1，操作uart1。在前述章节都偷懒使用的是`pl011`,我们根本没有为串口写任何驱动，直接走后门，往串口地址输出，就显示文字了，为了能够熟悉rp3的硬件，熟悉如何操作这些硬件，我们需要将输出任务交给rp3的串口模块：mini-uart
 
+类似下面输出:
+```shell
+rp3_init
+Hello world 0
+rp3_core0_init
+Hello world 1
+Hello world 2
+Hello world 3
+```
+不过我们需要改下QEMU启动参数：`-monitor none -serial null -chardev stdio,id=uart1 -serial chardev:uart1`
+
+并且记得修改QEMU的hw/arm/raspi.c，将其他核的起始地址改为0x80000:
+```c
+static void reset_secondary(ARMCPU *cpu, const struct arm_boot_info *info)
+{
+    CPUState *cs = CPU(cpu);
+    // cpu_set_pc(cs, info->smp_loader_start);
+    cpu_set_pc(cs, FIRMWARE_ADDR_3);
+}
+```
+
+适当修改Makefile：
+```Makefile
+COPS = -Wall -nostdlib -nostartfiles -ffreestanding -Iinclude -mgeneral-regs-only
+```
+
 # 硬件信息
 https://www.raspberrypi.org/app/uploads/2012/02/BCM2835-ARM-Peripherals.pdf
 这里能看到uart相关的寄存器信息，但是偏移和仿真的板子有点差异：
