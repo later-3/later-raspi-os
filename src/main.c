@@ -13,6 +13,9 @@ void print_uart0(const char *s) {
 void rp3_core0_init(void)
 {
     aux_uart_init();
+    while (1) {
+        uart_putchar(uart_getchar());
+    }
 }
 
 void c_entry(int cpuID) {

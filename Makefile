@@ -54,7 +54,7 @@ $(KERN_IMG): print_variable $(OBJ_FILES) Makefile
 	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
 
 run: $(KERN_IMG)
-	$(qemu) -M raspi3b -kernel $< -nographic
+	$(qemu) -M raspi3b -kernel $< -nographic -monitor none -serial null -chardev stdio,id=uart1 -serial chardev:uart1
 
 qemu-gdb: $(KERN_IMG)
 	$(qemu) -M raspi3b -kernel $< -gdb tcp::1234 -nographic -S
