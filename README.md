@@ -91,6 +91,15 @@ hw/char/bcm2835_aux.c
 # 集成开源的printf
 http://www.sparetimelabs.com/tinyprintf/tinyprintf.php
 
+`putc`函数就是串口的输出函数，把字符c往串口上输出就好
+```c
+// This function is required by printf function
+void putc(void* p, char c)
+{
+	uart_putchar(c);
+}
+```
+
 # GPIO模块仿真分析
 主要针对SD Card有对接，代码里面的一些配置，实际是没有实现的，GPPUD、GPPUDCLK0。
 
