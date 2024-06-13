@@ -101,4 +101,4 @@ bcm2835_aux_write
 bcm2835_aux_read
 ```
 
-QEMU9.0的代码，不支持disable aux，
+QEMU9.0的代码，不支持disable aux，使用QEMU相关的API，可以方便的对接键盘和命令行显示。
