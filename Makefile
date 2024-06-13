@@ -50,7 +50,7 @@ $(BUILD_DIR)/src/peripheral/%_c.o: $(SRC_DIR)/peripheral/%.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 $(KERN_IMG): print_variable $(OBJ_FILES) Makefile
-	$(LD) $(OBJ_FILES) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf
+	$(LD) $(OBJ_FILES) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf -Map System.map
 	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
 
 QEMU-START-ARGS = -M raspi3b -nographic -monitor none -serial null \
