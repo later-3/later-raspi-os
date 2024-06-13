@@ -1,16 +1,15 @@
 #include "peripheral/aux_uart.h"
 #include "peripheral/gpio.h"
+#include "utils.h"
 
-void
-uart_putchar(char c)
+void uart_putchar(char c)
 {
     while (!(read_reg(AUX_MU_LSR_REG) & 0x20))
         ;
     write_reg(AUX_MU_IO_REG, c & 0xFF);
 }
 
-char
-uart_getchar()
+char uart_getchar()
 {
     while (!(read_reg(AUX_MU_LSR_REG) & 0x01))
         ;
@@ -18,7 +17,7 @@ uart_getchar()
 }
 
 // This function is required by printf function
-void putc ( void* p, char c)
+void putc(void* p, char c)
 {
 	uart_putchar(c);
 }

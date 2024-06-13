@@ -1,0 +1,43 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch",    //名称
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/qemu-system-aarch64",   
+            "args": [
+                "-M", "raspi3b",
+                "-kernel","/root/code/later-raspi-os/build/kernel8.img",
+                // "-kernel","/root/code/raspberry-pi3-mini-os/1.hello_world/kernel8.img",
+                "--nographic",
+                // "-smp", "2",
+
+                "-monitor", "none",
+                "-serial", "null",
+                "-chardev", "stdio,id=uart1",
+                "-serial", "chardev:uart1",
+
+                // "-bios", "/home/joey/nestest.nes",
+                // "-D", "nes.log",
+
+                // "-monitor","tcp:localhost:1236,server=on,wait=off",
+                // "-d", "in_asm,out_asm",
+                
+                // "-serial","mon:stdio",
+                // "-serial","tcp::5678,server=on,wait=off",
+
+                "-s","-S"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",    //表示当前目录
+            "environment": [],
+            "externalConsole": false, // 在vscode自带的终端中运行，不打开外部终端
+            "miDebuggerPath": "/usr/bin/gdb",
+            "MIMode": "gdb",    //用gdb来debug 
+        }
+    ]
+}

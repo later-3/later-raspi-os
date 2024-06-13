@@ -2,7 +2,7 @@ GCCPREFIX := aarch64-linux-gnu-
 BUILD_DIR := build
 SRC_DIR := src
 
-qemu := /home/later/code/qemu-9.0.0/build/qemu-system-aarch64
+qemu := /root/code/qemu-9.0.0-rc0/build/qemu-system-aarch64
 
 KERN_IMG := $(BUILD_DIR)/kernel8.img
 CC := $(GCCPREFIX)gcc
@@ -14,10 +14,8 @@ OBJCOPY := $(GCCPREFIX)objcopy
 RM := rm -f
 
 CFLAGS := -Wall -nostdlib -g -Iinclude
-COPS = -Wall -nostdlib -nostartfiles -ffreestanding -Iinclude -mgeneral-regs-only
+COPS = -nostartfiles -ffreestanding -mgeneral-regs-only
 ASMFLAGS := -Iinclude
-
-OBJ := $(BUILD_DIR)/main.o  $(BUILD_DIR)/mm.o $(BUILD_DIR)/utils.o $(BUILD_DIR)/entry.o
 
 C_FILES = $(wildcard src/*.c)
 P_FILES = $(wildcard src/peripheral/*.c)
@@ -37,6 +35,7 @@ print_variable:
 	mkdir -p build
 	mkdir -p build/src
 	mkdir -p build/src/peripheral
+	@echo $(QEMU-START-ARGS)
 	@echo $(ASM_FILES)
 	@echo $(C_FILES)
 	@echo $(OBJ_FILES)
@@ -54,11 +53,14 @@ $(KERN_IMG): print_variable $(OBJ_FILES) Makefile
 	$(LD) $(OBJ_FILES) -T $(SRC_DIR)/linker.ld -o $(BUILD_DIR)/kernel8.elf
 	$(OBJCOPY) -O binary $(BUILD_DIR)/kernel8.elf $@
 
+QEMU-START-ARGS = -M raspi3b -nographic -monitor none -serial null \
+					-chardev stdio,id=uart1 -serial chardev:uart1
+
 run: $(KERN_IMG)
-	$(qemu) -M raspi3b -kernel $< -nographic -monitor none -serial null -chardev stdio,id=uart1 -serial chardev:uart1
+	$(qemu) $(QEMU-START-ARGS) -kernel $< 
 
 qemu-gdb: $(KERN_IMG)
-	$(qemu) -M raspi3b -kernel $< -gdb tcp::1234 -nographic -S
+	$(qemu) $(QEMU-START-ARGS) -kernel $< -gdb tcp::1234 -S
 
 gdb:
 	gdb-multiarch -n -x .gdbinit

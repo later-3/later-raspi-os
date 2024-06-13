@@ -88,3 +88,17 @@ hw/char/bcm2835_aux.c
 
 ```
 
+# 集成开源的printf
+http://www.sparetimelabs.com/tinyprintf/tinyprintf.php
+
+# GPIO模块仿真分析
+主要针对SD Card有对接，代码里面的一些配置，实际是没有实现的，GPPUD、GPPUDCLK0。
+
+# AUX_UART模块仿真分析
+
+```c
+bcm2835_aux_write
+bcm2835_aux_read
+```
+
+QEMU9.0的代码，不支持disable aux，
