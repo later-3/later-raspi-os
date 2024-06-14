@@ -51,3 +51,6 @@ void memset_rsp(void *start, unsigned char val, int len)
 ```c
 Hello world g 0
 ```
+
+# reference
+https://krinkinmu.github.io/2021/01/10/aarch64-interrupt-handling.html
