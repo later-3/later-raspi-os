@@ -6,173 +6,216 @@ Name             Origin             Length             Attributes
 
 Linker script and memory map
 
+LOAD build/src/irq_c.o
 LOAD build/src/main_c.o
 LOAD build/src/printf_c.o
 LOAD build/src/utils_c.o
 LOAD build/src/peripheral/aux_uart_c.o
 LOAD build/src/entry_s.o
+LOAD build/src/irq_s.o
 LOAD build/src/mm_s.o
 LOAD build/src/utils_s.o
+LOAD build/src/vector_s.o
                 0x0000000000080000                . = 0x80000
 
-.text.boot      0x0000000000080000      0xe30
+.text.boot      0x0000000000080000     0x1d40
  *(.text.boot)
  .text.boot     0x0000000000080000      0x120 build/src/entry_s.o
                 0x0000000000080000                _start
  *(.text)
- .text          0x0000000000080120      0x15c build/src/main_c.o
-                0x0000000000080120                print_uart0
-                0x000000000008016c                rp3_init
-                0x00000000000801c8                rp3_core0_init
-                0x00000000000801ec                c_entry
- .text          0x000000000008027c      0x948 build/src/printf_c.o
-                0x000000000008060c                tfp_format
-                0x0000000000080a1c                init_printf
-                0x0000000000080a54                tfp_printf
-                0x0000000000080b28                tfp_sprintf
- .text          0x0000000000080bc4       0x64 build/src/utils_c.o
-                0x0000000000080bc4                memset_rsp
- .text          0x0000000000080c28      0x1bc build/src/peripheral/aux_uart_c.o
-                0x0000000000080c28                uart_putchar
-                0x0000000000080c70                uart_getchar
-                0x0000000000080cac                putc
-                0x0000000000080cd0                aux_uart_init
- .text          0x0000000000080de4        0x0 build/src/entry_s.o
- .text          0x0000000000080de4       0x14 build/src/mm_s.o
-                0x0000000000080de4                memzero
- .text          0x0000000000080df8       0x38 build/src/utils_s.o
-                0x0000000000080df8                delay
-                0x0000000000080e08                get_cpuid
-                0x0000000000080e18                read_reg
-                0x0000000000080e20                write_reg
-                0x0000000000080e28                sleep
+ .text          0x0000000000080120       0x50 build/src/irq_c.o
+                0x0000000000080120                show_invalid_entry_message
+                0x0000000000080168                handle_irq
+ .text          0x0000000000080170      0x15c build/src/main_c.o
+                0x0000000000080170                print_uart0
+                0x00000000000801bc                rp3_init
+                0x0000000000080218                rp3_core0_init
+                0x000000000008023c                c_entry
+ .text          0x00000000000802cc      0x948 build/src/printf_c.o
+                0x000000000008065c                tfp_format
+                0x0000000000080a6c                init_printf
+                0x0000000000080aa4                tfp_printf
+                0x0000000000080b78                tfp_sprintf
+ .text          0x0000000000080c14       0x64 build/src/utils_c.o
+                0x0000000000080c14                memset_rsp
+ .text          0x0000000000080c78      0x1bc build/src/peripheral/aux_uart_c.o
+                0x0000000000080c78                uart_putchar
+                0x0000000000080cc0                uart_getchar
+                0x0000000000080cfc                putc
+                0x0000000000080d20                aux_uart_init
+ .text          0x0000000000080e34        0x0 build/src/entry_s.o
+ .text          0x0000000000080e34       0x1c build/src/irq_s.o
+                0x0000000000080e34                irq_vector_init
+                0x0000000000080e40                enable_irq
+                0x0000000000080e48                disable_irq
+ .text          0x0000000000080e50       0x14 build/src/mm_s.o
+                0x0000000000080e50                memzero
+ .text          0x0000000000080e64       0x38 build/src/utils_s.o
+                0x0000000000080e64                delay
+                0x0000000000080e74                get_cpuid
+                0x0000000000080e84                read_reg
+                0x0000000000080e8c                write_reg
+                0x0000000000080e94                sleep
+ *fill*         0x0000000000080e9c      0x164 
+ .text          0x0000000000081000      0xd40 build/src/vector_s.o
+                0x0000000000081000                vectors
+                0x0000000000081d3c                err_hang
 
 .text
  *(.text)
 
-.iplt           0x0000000000080e30        0x0
- .iplt          0x0000000000080e30        0x0 build/src/main_c.o
+.iplt           0x0000000000081d40        0x0
+ .iplt          0x0000000000081d40        0x0 build/src/irq_c.o
 
-.rodata         0x0000000000080e30       0x3a
- .rodata        0x0000000000080e30       0x3a build/src/main_c.o
-                0x0000000000080e30                UART0DR
+.rodata         0x0000000000081d40      0x1da
+ .rodata        0x0000000000081d40      0x19b build/src/irq_c.o
+ *fill*         0x0000000000081edb        0x5 
+ .rodata        0x0000000000081ee0       0x3a build/src/main_c.o
+                0x0000000000081ee0                UART0DR
 
-.eh_frame       0x0000000000080e70      0x248
- .eh_frame      0x0000000000080e70       0x88 build/src/main_c.o
- .eh_frame      0x0000000000080ef8      0x128 build/src/printf_c.o
+.eh_frame       0x0000000000081f20      0x278
+ .eh_frame      0x0000000000081f20       0x48 build/src/irq_c.o
+ .eh_frame      0x0000000000081f68       0x70 build/src/main_c.o
+                                         0x88 (size before relaxing)
+ .eh_frame      0x0000000000081fd8      0x128 build/src/printf_c.o
                                         0x138 (size before relaxing)
- .eh_frame      0x0000000000081020       0x18 build/src/utils_c.o
+ .eh_frame      0x0000000000082100       0x18 build/src/utils_c.o
                                          0x30 (size before relaxing)
- .eh_frame      0x0000000000081038       0x80 build/src/peripheral/aux_uart_c.o
+ .eh_frame      0x0000000000082118       0x80 build/src/peripheral/aux_uart_c.o
                                          0x98 (size before relaxing)
 
-.rela.dyn       0x00000000000810b8        0x0
- .rela.iplt     0x00000000000810b8        0x0 build/src/main_c.o
- .rela.got      0x00000000000810b8        0x0 build/src/main_c.o
+.rela.dyn       0x0000000000082198        0x0
+ .rela.iplt     0x0000000000082198        0x0 build/src/irq_c.o
+ .rela.got      0x0000000000082198        0x0 build/src/irq_c.o
  .rela.text.boot
-                0x00000000000810b8        0x0 build/src/main_c.o
+                0x0000000000082198        0x0 build/src/irq_c.o
 
-.data           0x00000000000810b8        0x0
+.data           0x0000000000082198        0x0
  *(.data)
- .data          0x00000000000810b8        0x0 build/src/main_c.o
- .data          0x00000000000810b8        0x0 build/src/printf_c.o
- .data          0x00000000000810b8        0x0 build/src/utils_c.o
- .data          0x00000000000810b8        0x0 build/src/peripheral/aux_uart_c.o
- .data          0x00000000000810b8        0x0 build/src/entry_s.o
- .data          0x00000000000810b8        0x0 build/src/mm_s.o
- .data          0x00000000000810b8        0x0 build/src/utils_s.o
+ .data          0x0000000000082198        0x0 build/src/irq_c.o
+ .data          0x0000000000082198        0x0 build/src/main_c.o
+ .data          0x0000000000082198        0x0 build/src/printf_c.o
+ .data          0x0000000000082198        0x0 build/src/utils_c.o
+ .data          0x0000000000082198        0x0 build/src/peripheral/aux_uart_c.o
+ .data          0x0000000000082198        0x0 build/src/entry_s.o
+ .data          0x0000000000082198        0x0 build/src/irq_s.o
+ .data          0x0000000000082198        0x0 build/src/mm_s.o
+ .data          0x0000000000082198        0x0 build/src/utils_s.o
+ .data          0x0000000000082198        0x0 build/src/vector_s.o
 
-.igot.plt       0x00000000000810b8        0x0
- .igot.plt      0x00000000000810b8        0x0 build/src/main_c.o
+.data.rel.local
+                0x0000000000082198       0x80
+ .data.rel.local
+                0x0000000000082198       0x80 build/src/irq_c.o
+                0x0000000000082198                entry_error_messages
 
-.got            0x00000000000810b8       0x20
- .got           0x00000000000810b8       0x20 build/src/main_c.o
-                0x00000000000810b8                _GLOBAL_OFFSET_TABLE_
+.igot.plt       0x0000000000082218        0x0
+ .igot.plt      0x0000000000082218        0x0 build/src/irq_c.o
 
-.got.plt        0x00000000000810d8       0x18
- .got.plt       0x00000000000810d8       0x18 build/src/main_c.o
-                0x00000000000810f0                . = ALIGN (0x8)
-                0x00000000000810f0                PROVIDE (bss_begin = .)
+.got            0x0000000000082218       0x20
+ .got           0x0000000000082218       0x20 build/src/irq_c.o
+                0x0000000000082218                _GLOBAL_OFFSET_TABLE_
 
-.bss            0x00000000000810f0       0x18
+.got.plt        0x0000000000082238       0x18
+ .got.plt       0x0000000000082238       0x18 build/src/irq_c.o
+                0x0000000000082250                . = ALIGN (0x8)
+                0x0000000000082250                PROVIDE (bss_begin = .)
+
+.bss            0x0000000000082250       0x18
  *(.bss*)
- .bss           0x00000000000810f0        0x4 build/src/main_c.o
-                0x00000000000810f0                g
- *fill*         0x00000000000810f4        0x4 
- .bss           0x00000000000810f8       0x10 build/src/printf_c.o
- .bss           0x0000000000081108        0x0 build/src/utils_c.o
- .bss           0x0000000000081108        0x0 build/src/peripheral/aux_uart_c.o
- .bss           0x0000000000081108        0x0 build/src/entry_s.o
- .bss           0x0000000000081108        0x0 build/src/mm_s.o
- .bss           0x0000000000081108        0x0 build/src/utils_s.o
-                0x0000000000081108                PROVIDE (bss_end = .)
-                0x0000000000082108                . = (. + 0x1000)
-                0x0000000000082108                stack_top = .
+ .bss           0x0000000000082250        0x0 build/src/irq_c.o
+ .bss           0x0000000000082250        0x4 build/src/main_c.o
+                0x0000000000082250                g
+ *fill*         0x0000000000082254        0x4 
+ .bss           0x0000000000082258       0x10 build/src/printf_c.o
+ .bss           0x0000000000082268        0x0 build/src/utils_c.o
+ .bss           0x0000000000082268        0x0 build/src/peripheral/aux_uart_c.o
+ .bss           0x0000000000082268        0x0 build/src/entry_s.o
+ .bss           0x0000000000082268        0x0 build/src/irq_s.o
+ .bss           0x0000000000082268        0x0 build/src/mm_s.o
+ .bss           0x0000000000082268        0x0 build/src/utils_s.o
+ .bss           0x0000000000082268        0x0 build/src/vector_s.o
+                0x0000000000082268                PROVIDE (bss_end = .)
+                0x0000000000083268                . = (. + 0x1000)
+                0x0000000000083268                stack_top = .
 OUTPUT(build/kernel8.elf elf64-littleaarch64)
 LOAD linker stubs
 
-.debug_info     0x0000000000000000      0x885
- .debug_info    0x0000000000000000      0x20c build/src/main_c.o
- .debug_info    0x000000000000020c      0x49b build/src/printf_c.o
- .debug_info    0x00000000000006a7       0xb7 build/src/utils_c.o
- .debug_info    0x000000000000075e      0x127 build/src/peripheral/aux_uart_c.o
+.debug_info     0x0000000000000000      0x96f
+ .debug_info    0x0000000000000000       0xea build/src/irq_c.o
+ .debug_info    0x00000000000000ea      0x20c build/src/main_c.o
+ .debug_info    0x00000000000002f6      0x49b build/src/printf_c.o
+ .debug_info    0x0000000000000791       0xb7 build/src/utils_c.o
+ .debug_info    0x0000000000000848      0x127 build/src/peripheral/aux_uart_c.o
 
-.debug_abbrev   0x0000000000000000      0x479
- .debug_abbrev  0x0000000000000000      0x167 build/src/main_c.o
- .debug_abbrev  0x0000000000000167      0x1af build/src/printf_c.o
- .debug_abbrev  0x0000000000000316       0x94 build/src/utils_c.o
- .debug_abbrev  0x00000000000003aa       0xcf build/src/peripheral/aux_uart_c.o
+.debug_abbrev   0x0000000000000000      0x550
+ .debug_abbrev  0x0000000000000000       0xd7 build/src/irq_c.o
+ .debug_abbrev  0x00000000000000d7      0x167 build/src/main_c.o
+ .debug_abbrev  0x000000000000023e      0x1af build/src/printf_c.o
+ .debug_abbrev  0x00000000000003ed       0x94 build/src/utils_c.o
+ .debug_abbrev  0x0000000000000481       0xcf build/src/peripheral/aux_uart_c.o
 
-.debug_aranges  0x0000000000000000       0xc0
+.debug_aranges  0x0000000000000000       0xf0
  .debug_aranges
-                0x0000000000000000       0x30 build/src/main_c.o
+                0x0000000000000000       0x30 build/src/irq_c.o
  .debug_aranges
-                0x0000000000000030       0x30 build/src/printf_c.o
+                0x0000000000000030       0x30 build/src/main_c.o
  .debug_aranges
-                0x0000000000000060       0x30 build/src/utils_c.o
+                0x0000000000000060       0x30 build/src/printf_c.o
  .debug_aranges
-                0x0000000000000090       0x30 build/src/peripheral/aux_uart_c.o
+                0x0000000000000090       0x30 build/src/utils_c.o
+ .debug_aranges
+                0x00000000000000c0       0x30 build/src/peripheral/aux_uart_c.o
 
-.debug_line     0x0000000000000000      0x400
- .debug_line    0x0000000000000000       0xbe build/src/main_c.o
- .debug_line    0x00000000000000be      0x214 build/src/printf_c.o
- .debug_line    0x00000000000002d2       0x75 build/src/utils_c.o
- .debug_line    0x0000000000000347       0xb9 build/src/peripheral/aux_uart_c.o
+.debug_line     0x0000000000000000      0x462
+ .debug_line    0x0000000000000000       0x62 build/src/irq_c.o
+ .debug_line    0x0000000000000062       0xbe build/src/main_c.o
+ .debug_line    0x0000000000000120      0x214 build/src/printf_c.o
+ .debug_line    0x0000000000000334       0x75 build/src/utils_c.o
+ .debug_line    0x00000000000003a9       0xb9 build/src/peripheral/aux_uart_c.o
 
-.debug_str      0x0000000000000000      0x276
- .debug_str     0x0000000000000000      0x14d build/src/main_c.o
+.debug_str      0x0000000000000000      0x2be
+ .debug_str     0x0000000000000000       0xeb build/src/irq_c.o
+                                         0xf0 (size before relaxing)
+ .debug_str     0x00000000000000eb       0xaa build/src/main_c.o
                                         0x15f (size before relaxing)
- .debug_str     0x000000000000014d       0xa4 build/src/printf_c.o
+ .debug_str     0x0000000000000195       0xa4 build/src/printf_c.o
                                         0x177 (size before relaxing)
- .debug_str     0x00000000000001f1        0x6 build/src/utils_c.o
+ .debug_str     0x0000000000000239        0x6 build/src/utils_c.o
                                          0xa5 (size before relaxing)
- .debug_str     0x00000000000001f7       0x7f build/src/peripheral/aux_uart_c.o
+ .debug_str     0x000000000000023f       0x7f build/src/peripheral/aux_uart_c.o
                                          0xd6 (size before relaxing)
 
 .debug_line_str
-                0x0000000000000000       0xde
+                0x0000000000000000       0xe8
  .debug_line_str
-                0x0000000000000000       0x58 build/src/main_c.o
+                0x0000000000000000       0x31 build/src/irq_c.o
+                                         0x5f (size before relaxing)
+ .debug_line_str
+                0x0000000000000031       0x31 build/src/main_c.o
                                          0x88 (size before relaxing)
  .debug_line_str
-                0x0000000000000058       0x51 build/src/printf_c.o
+                0x0000000000000062       0x51 build/src/printf_c.o
                                          0x9b (size before relaxing)
  .debug_line_str
-                0x00000000000000a9        0xc build/src/utils_c.o
+                0x00000000000000b3        0xc build/src/utils_c.o
                                          0x54 (size before relaxing)
  .debug_line_str
-                0x00000000000000b5       0x29 build/src/peripheral/aux_uart_c.o
+                0x00000000000000bf       0x29 build/src/peripheral/aux_uart_c.o
                                          0x83 (size before relaxing)
 
 .comment        0x0000000000000000       0x2b
- .comment       0x0000000000000000       0x2b build/src/main_c.o
+ .comment       0x0000000000000000       0x2b build/src/irq_c.o
                                          0x2c (size before relaxing)
+ .comment       0x000000000000002b       0x2c build/src/main_c.o
  .comment       0x000000000000002b       0x2c build/src/printf_c.o
  .comment       0x000000000000002b       0x2c build/src/utils_c.o
  .comment       0x000000000000002b       0x2c build/src/peripheral/aux_uart_c.o
 
 .note.GNU-stack
                 0x0000000000000000        0x0
+ .note.GNU-stack
+                0x0000000000000000        0x0 build/src/irq_c.o
  .note.GNU-stack
                 0x0000000000000000        0x0 build/src/main_c.o
  .note.GNU-stack

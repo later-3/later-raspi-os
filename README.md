@@ -54,3 +54,6 @@ Hello world g 0
 
 # reference
 https://krinkinmu.github.io/2021/01/10/aarch64-interrupt-handling.html
+
+每个level都有自己的系统寄存器，比如：SPSR_EL3, SPSR_EL2等。通过不通的配置，EL可以有自己的栈指针寄存器或者他们可以使用EL0的栈指针。
+
