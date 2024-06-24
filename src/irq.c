@@ -28,6 +28,22 @@ void enable_interrupt_controller( void );
 void enable_irq( void );
 void disable_irq( void );
 
+extern char choose;
+void enable_interrupt_controller()
+{
+        switch (choose) {
+	        case '1':
+			write_reg(ENABLE_IRQS_1, SYSTEM_TIMER_IRQ_1);
+			break;
+		case '3':
+			write_reg(ENABLE_IRQS_1, SYSTEM_TIMER_IRQ_3);
+			break;
+		default:
+			printf("Undefine choose: %d\r\n", choose);
+	}	
+	
+}
+
 void show_invalid_entry_message(int type, unsigned long esr, unsigned long address)
 {
 	printf("%s, ESR: %x, address: %x\r\n", entry_error_messages[type], esr, address);
@@ -35,15 +51,15 @@ void show_invalid_entry_message(int type, unsigned long esr, unsigned long addre
 
 void handle_irq(void)
 {
-	// unsigned int irq = get32(IRQ_PENDING_1);
-	// switch (irq) {
-	// 	case (SYSTEM_TIMER_IRQ_1):
-	// 		handle_timer_irq();
-	// 		break;
-	// 	case (SYSTEM_TIMER_IRQ_3):
-	// 		handle_timer_irq_3();
-	// 		break;
-	// 	default:
-	// 		printf("Unknown pending irq: %x\r\n", irq);
-	// }
+	unsigned int irq = read_reg(IRQ_PENDING_1);
+	switch (irq) {
+		case (SYSTEM_TIMER_IRQ_1):
+			handle_timer_irq();
+			break;
+		case (SYSTEM_TIMER_IRQ_3):
+			handle_timer_irq_3();
+			break;
+		default:
+			printf("Unknown pending irq: %x\r\n", irq);
+	}
 }

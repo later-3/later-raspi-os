@@ -8,18 +8,20 @@
             "name": "(gdb) Launch",    //名称
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/qemu-system-aarch64",   
+            "miDebuggerServerAddress": "127.0.0.1:1234",
+            "program": "/root/code/later-raspi-os/build/kernel8.elf",   
             "args": [
-                "-M", "raspi3b",
-                "-kernel","/root/code/later-raspi-os/build/kernel8.img",
-                // "-kernel","/root/code/raspberry-pi3-mini-os/1.hello_world/kernel8.img",
-                "--nographic",
-                // "-smp", "2",
+                "-n", "-x", ".gdbinit",
+                // "-M", "raspi3b",
+                // "-kernel","/root/code/later-raspi-os/build/kernel8.elf",
+                // // "-kernel","/root/code/raspberry-pi3-mini-os/1.hello_world/kernel8.img",
+                // "--nographic",
+                // // "-smp", "2",
 
-                "-monitor", "none",
-                "-serial", "null",
-                "-chardev", "stdio,id=uart1",
-                "-serial", "chardev:uart1",
+                // "-monitor", "none",
+                // "-serial", "null",
+                // "-chardev", "stdio,id=uart1",
+                // "-serial", "chardev:uart1",
 
                 // "-bios", "/home/joey/nestest.nes",
                 // "-D", "nes.log",
@@ -30,13 +32,13 @@
                 // "-serial","mon:stdio",
                 // "-serial","tcp::5678,server=on,wait=off",
 
-                "-s","-S"
+                // "-s","-S"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",    //表示当前目录
             "environment": [],
             "externalConsole": false, // 在vscode自带的终端中运行，不打开外部终端
-            "miDebuggerPath": "/usr/bin/gdb",
+            "miDebuggerPath": "/usr/bin/gdb-multiarch",
             "MIMode": "gdb",    //用gdb来debug 
         }
     ]
